@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Will You Be My Valentine? 🐊</title>
+  <!-- Load external CSS -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Confetti script -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+  <style>
+    /* Swamp container */
+    .swamp-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      z-index: 1000;
+    }
+    .swamp {
+      width: 200px;
+      filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+      transition: all 0.3s;
+    }
+    .swamp:hover {
+      transform: scale(1.1);
+    }
+
+    /* Main container */
+    .container {
+      display: none; /* Hidden initially */
+      background: #1a3b2d; /* Dark green */
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+      max-width: 600px;
+      margin: 50px auto;
+      position: relative;
+      transform: scale(0);
+      animation: popOut 0.5s ease-out forwards;
+    }
+    @keyframes popOut {
+      0% { transform: scale(0); }
+      80% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    /* Crocodile image */
+    .crocodile-img {
+      width: 200px;
+      margin: 20px;
+      cursor: pointer;
+      transform: translateY(100%);
+      animation: crocodilePopUp 0.8s ease-out forwards;
+    }
+    @keyframes crocodilePopUp {
+      0% { transform: translateY(100%); }
+      60% { transform: translateY(-20%); }
+      100% { transform: translateY(0); }
+    }
+
+    /* Buttons */
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    #yesBtn { background: #228B22; color: white; }
+    #noBtn { background: #A52A2A; color: white; position: relative; }
+
+    /* Chomp animation for "No" button */
+    @keyframes chomp {
+      0% { transform: scale(1); }
+      50% { transform: scale(0.8); }
+      100% { transform: scale(0); }
+    }
+
+    /* Captcha / Puzzle styles */
+    .captcha {
+      display: none;
+      margin: 50px auto;
+      padding: 10px;
+      background: #2d5a4a; /* Swampy green */
+      border-radius: 20px;
+      max-width: 500px;
+      text-align: center;
+    }
+    .puzzle-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 3px;
+      width: 305px;
+      height: 305px;
+      margin: 10px auto;
+      border: 2px solid #8B4513;
+    }
+    .puzzle-piece {
+      cursor: pointer;
+      transition: transform 0.3s, outline 0.2s;
+      width: 100%;
+      height: 100%;
+      background-size: 100% 100%;
+      background-position: center;
+      box-sizing: border-box;
+    }
+    #feedback {
+      margin-top: 15px;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #d4af37; /* Gold text */
+    }
+
+    /* Body and text styles */
+    body {
+      background: #1a3b2d; /* Dark green */
+      font-family: 'Jungle Fever.ttf', cursive;
+      text-align: center;
+      padding: 20px;
+      overflow-x: hidden;
+      color: #d4af37; /* Gold text */
+    }
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px #8B4513;
+    }
+
+    /* Lily pads (replacing roses) */
+    .lily-pad {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      background-image: url('images/tomato.png');
+      background-size: cover;
+      animation: sway 3s infinite ease-in-out;
+    }
+    .lily-top-left { top: 75px; left: 50px; }
+    .lily-top-right { top: 75px; right: 50px; }
+    .lily-bottom-left { bottom: 75px; left: 50px; }
+    .lily-bottom-right { bottom: 75px; right: 50px; }
+    @keyframes sway {
+      0%, 100% { transform: rotate(-5deg) translateX(0); }
+      50% { transform: rotate(5deg) translateX(5px); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Swamp introduction -->
+  <div class="swamp-container" id="swampContainer">
+    <img src="images/swamp.png" class="swamp" alt="Swamp" id="swamp">
+  </div>
+
+  <!-- Main content (hidden initially) -->
+  <div class="container" id="mainContainer">
+    <h1 id="question">Will You Be My Valentine? 🐊</h1>
+    <img src="images/Cute Crocodile.gif" class="crocodile-img" alt="Cute Crocodile" id="crocodileImg">
+    <div class="buttons">
+      <button id="yesBtn">Yes 🐊💚</button>
+      <button id="noBtn">No 🐊</button>
+    </div>
+
+    <!-- Captcha / Puzzle Section -->
+    <div class="captcha" id="captcha">
+      <h3>Prove you're not a robot! 🕵️</h3>
+      <p>Choose the photos where u can see urself rial.</p>
+      <div class="puzzle-grid" id="puzzleGrid"></div>
+      <div id="feedback"></div>
+    </div>
+  </div>
+
+  <!-- Lily pads (replacing roses) -->
+  <div class="lily-pad lily-top-left"></div>
+  <div class="lily-pad lily-top-right"></div>
+  <div class="lily-pad lily-bottom-left"></div>
+  <div class="lily-pad lily-bottom-right"></div>
+
+  <script>
+    // Element selections
+    const swamp = document.getElementById('swamp');
+    const swampContainer = document.getElementById('swampContainer');
+    const mainContainer = document.getElementById('mainContainer');
+    const questionHeading = document.getElementById('question');
+    const crocodileImg = document.getElementById('crocodileImg');
+    const yesBtn = document.getElementById('yesBtn');
+    const noBtn = document.getElementById('noBtn');
+    const captcha = document.getElementById('captcha');
+    const puzzleGrid = document.getElementById('puzzleGrid');
+    const feedback = document.getElementById('feedback');
+
+    // Define images for happy and sad states
+    const happyCrocodileImage = "images/Crocodile.gif"; // path to happy crocodile image
+    const sadCrocodileImage = "images/sad-crocodile.jpg"; // path to sad crocodile image
+
+    // Swamp intro: ripple animation then show main content.
+    swamp.addEventListener('click', () => {
+      swamp.style.animation = 'ripple 0.5s ease-out';
+      setTimeout(() => {
+        swampContainer.style.display = 'none';
+        mainContainer.style.display = 'block';
+      }, 500);
+    });
+
+    // No button logic
+let noButtonStage = 0;
+const noButtonTexts = ["No 🐊", "Are you sure? 🐊", "Last chance! 🐊", "CHOMP! 🐊"];
+const crocodileStates = [
+  "images/Rong 2.gif",
+  "images/Rong 1.jpg",
+  "images/Sad-crocodile.jpg",
+  "images/chomping-croc.png"
+];
+
+noBtn.addEventListener('click', () => {
+  noButtonStage = Math.min(noButtonStage + 1, 3);
+  noBtn.textContent = noButtonTexts[noButtonStage];
+  
+  if (noButtonStage < 3) {
+    crocodileImg.src = crocodileStates[noButtonStage];
+  }
+  
+  if (noButtonStage === 3) {
+    noBtn.style.animation = 'chomp 3s forwards';
+    noBtn.style.cursor = 'not-allowed';
+    noBtn.disabled = true;
+    crocodileImg.src = "images/chomping-croc.png";
+  }
+});
+
+    // Yes button logic
+    yesBtn.addEventListener('click', () => {
+      // Reset no button state.
+      noButtonStage = 0;
+      noBtn.textContent = "No 🐊";
+      noBtn.style.animation = '';
+      noBtn.disabled = false;
+      noBtn.style.cursor = 'pointer';
+
+      // Reset crocodile image to happy.
+      crocodileImg.src = happyCrocodileImage;
+
+      // Hide the buttons.
+      document.querySelector('.buttons').style.display = 'none';
+      questionHeading.textContent = "Prove you're not a robot... 🐊";
+
+      setTimeout(() => {
+        captcha.style.display = 'block';
+        initPuzzle();
+      }, 1500);
+    });
+
+    // --- Puzzle / Captcha Logic ---
+    const correctImages = [
+      "images/tomato-1.jpg",
+      "images/tomato-2.jpg",
+      "images/tomato-3.jpg",
+    ];
+    const fillerImages = [
+      "images/not-tomato1.png",
+      "images/not-tomato2.jpg",
+      "images/not-tomato3.jpg",
+      "images/not-tomato4.jpg",
+      "images/not-tomato5.jpg",
+      "images/not-tomato6.jpg",
+    ];
+
+    let selectedIndices = [];
+    let correctIndices = [];
+
+    function initPuzzle() {
+      renderPuzzleGrid();
+    }
+
+    function renderPuzzleGrid() {
+      puzzleGrid.innerHTML = '';
+      selectedIndices = [];
+      feedback.textContent = '';
+
+      // Combine images: 3 correct and 6 filler
+      const allImages = [...correctImages, ...fillerImages.slice(0, 6)];
+      shuffleArray(allImages);
+
+      // Determine which indices are correct.
+      correctIndices = [];
+      for (let i = 0; i < allImages.length; i++) {
+        if (correctImages.includes(allImages[i])) {
+          correctIndices.push(i);
+        }
+      }
+
+      // Create each puzzle piece.
+      for (let i = 0; i < 9; i++) {
+        const piece = document.createElement('div');
+        piece.classList.add('puzzle-piece');
+        piece.style.backgroundImage = `url(${allImages[i]})`;
+        piece.dataset.index = i;
+        piece.addEventListener('click', () => selectImage(piece, i));
+        puzzleGrid.appendChild(piece);
+      }
+
+      // Create and add the "Check" button.
+      const checkButton = document.createElement('button');
+      checkButton.textContent = 'Check';
+      checkButton.addEventListener('click', checkSelection);
+      feedback.appendChild(checkButton);
+    }
+
+    function selectImage(piece, index) {
+      if (selectedIndices.includes(index)) {
+        selectedIndices = selectedIndices.filter(i => i !== index);
+        piece.style.outline = '';
+      } else {
+        selectedIndices.push(index);
+        piece.style.outline = '4px solid #228B22';
+      }
+    }
+
+    function checkSelection() {
+      if (arraysEqual(selectedIndices, correctIndices)) {
+        feedback.textContent = 'Good bepi';
+        const correctImg = document.createElement('img');
+        correctImg.src = 'images/right-answer.gif';
+        correctImg.style.width = '120px';
+        correctImg.style.display = 'block';
+        correctImg.style.margin = '20px auto';
+        feedback.appendChild(correctImg);
+        // After a short delay, remove the captcha and show the Yay message with confetti.
+        setTimeout(() => {
+          captcha.style.display = 'none';
+          questionHeading.textContent = "Nalampasan m n ang aking mga pagsobuk! 🐊💚";
+          // Set the final crocodile image to happy.
+          crocodileImg.src = "images/12-good.gif";
+          confetti({
+            particleCount: 200,
+            spread: 100,
+            origin: { y: 0.2 },
+            colors: ['#228B22', '#8B4513', '#d4af37'], // Green, brown, gold
+          });
+          // Create extra text with the same style as the h1 ("Yayyy" text)
+          const extraText = document.createElement('p');
+          extraText.textContent = "Wear something green, I pick up at 12sharp!";
+          extraText.style.fontSize = "2.5em";
+          extraText.style.color = "#d4af37";
+          extraText.style.fontFamily = "'Jungle Fever', cursive";
+          extraText.style.textShadow = "2px 2px #8B4513";
+          mainContainer.appendChild(extraText);
+
+          // Append four new lily pads at the corners of the main container.
+          const positions = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
+          positions.forEach(pos => {
+            const newLilyPad = document.createElement('div');
+            newLilyPad.className = "lily-pad lily-" + pos;
+            // Make these lily pads smaller.
+            newLilyPad.style.width = "40px";
+            newLilyPad.style.height = "40px";
+            // Override their positions so they are at the corners of mainContainer.
+            if (pos === 'top-left') {
+              newLilyPad.style.top = "10px";
+              newLilyPad.style.left = "10px";
+            } else if (pos === 'top-right') {
+              newLilyPad.style.top = "10px";
+              newLilyPad.style.right = "10px";
+            } else if (pos === 'bottom-left') {
+              newLilyPad.style.bottom = "10px";
+              newLilyPad.style.left = "10px";
+            } else if (pos === 'bottom-right') {
+              newLilyPad.style.bottom = "10px";
+              newLilyPad.style.right = "10px";
+            }
+            mainContainer.appendChild(newLilyPad);
+          });
+        }, 2000);
+      } else {
+        feedback.textContent = 'Try Again! Shuffling images...';
+        setTimeout(() => {
+          renderPuzzleGrid();
+        }, 1500);
+      }
+    }
+
+    function arraysEqual(a, b) {
+      if (a.length !== b.length) return false;
+      let sortedA = [...a].sort();
+      let sortedB = [...b].sort();
+      for (let i = 0; i < sortedA.length; i++) {
+        if (sortedA[i] !== sortedB[i]) return false;
+      }
+      return true;
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Optional: Give the crocodile a fun random tail wag every second.
+    setInterval(() => {
+      crocodileImg.style.transform = `rotate(${Math.random() * 10 - 5}deg)`;
+    }, 1500);
+  </script>
+</body>
+</html>

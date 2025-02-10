@@ -1,0 +1,14 @@
+@font-face {
+    font-family: 'Jungle Fever';
+    src: url('fonts/Jungle Fever.TTF') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  body {
+    font-family: 'Jungle Fever', cursive;
+  }
+  
+  h1 {
+    font-family: 'Jungle Fever', cursive;
+  }
